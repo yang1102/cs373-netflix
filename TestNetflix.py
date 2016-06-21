@@ -14,7 +14,8 @@
 
 from io import StringIO
 from unittest import main, TestCase
-from Netflix import netflix_read, netflix_print, netflix_eval, netflix_solve, netflix_load_cache, netflix_rmse
+from Netflix import netflix_read, netflix_print, netflix_eval
+from Netflix import netflix_solve, netflix_load_cache, netflix_rmse
 
 # -----------
 # TestNetflix
@@ -64,33 +65,41 @@ class TestNetflix (TestCase):
     # eval
     # ----
     def test_eval_1(self):
-        cache = {'mYear': {1: 1984, 2: 1993, 3: 2003},
-                 'mRatingCache': {1: 4.2134, 2: 4.1235, 3: 2.6688},
-                 'avgYear': {1000: {1980: 3.5432, 1990: 3.456}, 2000: {1980: 4.217, 2000: 3.8864}, 3000: {1980: 3.459, 1995: 4.0012}}}
+        cache = {'m_year': {1: 1984, 2: 1993, 3: 2003},
+                 'm_rating_cache': {1: 4.2134, 2: 4.1235, 3: 2.6688},
+                 'avg_year': {1000: {1980: 3.5432, 1990: 3.456},
+                              2000: {1980: 4.217, 2000: 3.8864},
+                              3000: {1980: 3.459, 1995: 4.0012}}}
         val = netflix_eval(1, [1000, 2000, 3000], cache)
         self.assertEqual(val, [3.9, 4.2, 3.8])
 
     # Test the predict rate range
     def test_eval_2(self):
-        cache = {'mYear': {1: 1984, 2: 1993, 3: 2003},
-                 'mRatingCache': {1: 5.5678, 2: 4.1235, 3: 2.6688},
-                 'avgYear': {1000: {1980: 5.1234, 1990: 3.456}, 2000: {1980: 4.217, 2000: 3.8864}, 3000: {1980: 3.459, 1995: 4.0012}}}
+        cache = {'m_year': {1: 1984, 2: 1993, 3: 2003},
+                 'm_rating_cache': {1: 5.5678, 2: 4.1235, 3: 2.6688},
+                 'avg_year': {1000: {1980: 5.5432, 1990: 3.456},
+                              2000: {1980: 4.217, 2000: 3.8864},
+                              3000: {1980: 3.459, 1995: 4.0012}}}
         with self.assertRaises(AssertionError):
             netflix_eval(1, [1000, 2000], cache)
 
     # Test the file movie year null
     def test_eval_3(self):
-        cache = {'mYear': {1: 1984, 2: 'NULL', 3: 2003},
-                 'mRatingCache': {1: 4.2134, 2: 4.1235, 3: 2.6688},
-                 'avgYear': {1000: {1980: 4.679, 1990: 3.456, 'NULL': 4.9875}, 2000: {1980: 4.217, 2000: 3.8864}, 3000: {1980: 3.459, 1995: 4.0012, 'NULL': 3.1248}}}
+        cache = {'m_year': {1: 1984, 2: 'NULL', 3: 2003},
+                 'm_rating_cache': {1: 4.2134, 2: 4.1235, 3: 2.6688},
+                 'avg_year': {1000: {1980: 4.679, 1990: 3.456, 'NULL': 4.9875},
+                              2000: {1980: 4.217, 2000: 3.8864},
+                              3000: {1980: 3.459, 1995: 4.0012, 'NULL': 3.1248}}}
         val = netflix_eval(2, [1000, 3000], cache)
         self.assertEqual(val, [4.6, 3.6])
 
     # Test the customer saw null movie
     def test_eval_4(self):
-        cache = {'mYear': {1: 1984, 2: 1927, 3: 2003},
-                 'mRatingCache': {1: 4.2134, 2: 4.1235, 3: 2.6688},
-                 'avgYear': {1000: {1980: 4.679, 1990: 3.456, 'NULL': 4.9875}, 2000: {1980: 4.217, 2000: 3.8864}, 3000: {1980: 3.459, 1995: 4.0012, 'NULL': 3.1248}}}
+        cache = {'m_year': {1: 1984, 2: 1927, 3: 2003},
+                 'm_rating_cache': {1: 4.2134, 2: 4.1235, 3: 2.6688},
+                 'avg_year': {1000: {1980: 4.679, 1990: 3.456, 'NULL': 4.9875},
+                              2000: {1980: 4.217, 2000: 3.8864},
+                              3000: {1980: 3.459, 1995: 4.0012, 'NULL': 3.1248}}}
         val = netflix_eval(1, [1000, 2000, 3000], cache)
         self.assertEqual(val,  [4.4, 4.2, 3.8])
 
@@ -103,17 +112,17 @@ class TestNetflix (TestCase):
         self.assertEqual(len(cache), 16938)
 
     def test_cache_open_2(self):
-        key = 'mYear'
+        key = 'm_year'
         cache = netflix_load_cache(key)
         self.assertEqual(len(cache), 17770)
 
     def test_cache_open_3(self):
-        key = 'avgYear'
+        key = 'avg_year'
         cache = netflix_load_cache(key)
         self.assertEqual(len(cache), 480189)
 
     def test_cache_open_4(self):
-        key = 'mRatingCache'
+        key = 'm_rating_cache'
         cache = netflix_load_cache(key)
         self.assertEqual(len(cache), 17770)
 

@@ -14,79 +14,81 @@ from numpy import mean, sqrt, square, subtract
 
 BASE_URL = 'http://www.cs.utexas.edu/users/downing/netflix-caches/'
 CACHE_NAME = {
-    'answer': 'bis266-probeAns.p', 'mRatingCache': 'amm6364-averageMovieRating.p',
-    'mYear': 'bdd465-movieYear.p', 'avgYear': 'sy6955-avgUserFiveYears.p'}
+    'answer': 'bis266-probeAns.p',
+    'm_rating_cache': 'amm6364-averageMovieRating.p',
+    'm_year': 'bdd465-movieYear.p',
+    'avg_year': 'sy6955-avgUserFiveYears.p'}
 
 
 # no order
 def netflix_read(line):
-    cId = []
+    customer_id = []
     line = line.split()
-    # fId = int(line[0].strip(':'))
-    # cId += [int(i) for i in line[1:]]
+    # film_id = int(line[0].strip(':'))
+    # customer_id += [int(i) for i in line[1:]]
     try:
-        fId = int(line[0].strip(':'))
+        film_id = int(line[0].strip(':'))
     except ValueError:
-        fId = -1
+        film_id = -1
     try:
-        cId += [int(i) for i in line[1:]]
+        customer_id += [int(i) for i in line[1:]]
     except ValueError:
-        cId = -1
-    # assert the fId and cId is valid
-    assert(fId != -1 or cId != -1)
-    return fId, cId
+        customer_id = [-1]
+    # assert the film_id and customer_id is valid
+    assert film_id != -1 or customer_id != [-1]
+    return film_id, customer_id
 
 
-def netflix_print(writer, fId, predRate):
+def netflix_print(writer, film_id, pred_rate):
     output = ''
-    for i in predRate:
+    for i in pred_rate:
         output += format(i, '.1f') + '\n'
-    writer.write(str(fId) + ':\n' + output)
+    writer.write(str(film_id) + ':\n' + output)
 
 
-# def netflix_eval(fId, cId, cache):
+# def netflix_eval(film_id, customer_id, cache):
 # preditciont alg 1
 #     '''
 #     get avg rating for the movie and avg rating for customer
 #     avg it
 #     '''
 #     cRatingCache = cache['cRatingCache']
-#     mRatingCache = cache['mRatingCache']
+#     m_rating_cache = cache['m_rating_cache']
 #     result = []
-#     for i in cId:
-#         predRate = round((cRatingCache[i] + mRatingCache[fId]) / 2, 1)
-#         assert(1 <= predRate <= 5)
-#         result += [predRate]
+#     for i in customer_id:
+#         pred_rate = round((cRatingCache[i] + m_rating_cache[film_id]) / 2, 1)
+#         assert(1 <= pred_rate <= 5)
+#         result += [pred_rate]
 #     return result
-#     return [(cRatingCache[i]+mRatingCache[fId])/2 for i in cId]
+#     return [(cRatingCache[i]+m_rating_cache[film_id])/2 for i in customer_id]
 
-def netflix_eval(fId, cId, cache):
+def netflix_eval(film_id, customer_id, cache):
     # preditciont alg 1
     '''
     get avg rating for the movie and avg rating for year
     avg it
     '''
-    mRatingCache = cache['mRatingCache']
-    mYear = cache['mYear']
-    avgYear = cache['avgYear']
+    m_rating_cache = cache['m_rating_cache']
+    m_year = cache['m_year']
+    avg_year = cache['avg_year']
     result = []
-    predRate = 0
-    for i in cId:
-        movie_year = mYear[fId]
+    pred_rate = 0
+    for i in customer_id:
+        movie_year = m_year[film_id]
         if movie_year == 'NULL':
-            predRate = round(
-                (avgYear[i][movie_year] + mRatingCache[fId]) / 2, 1)
-            # predRate = (avgYear[i][movie_year]+ mRatingCache[fId]) / 2
+            pred_rate = round(
+                (avg_year[i][movie_year] + m_rating_cache[film_id]) / 2, 1)
+            # pred_rate = (avg_year[i][movie_year]+ m_rating_cache[film_id]) / 2
 
         else:
             movie_year = int(movie_year)
-            for year in avgYear[i]:
-                if (year != 'NULL' and (movie_year in range(year, year + 5))):
-                    predRate = round(
-                        (avgYear[i][year] + mRatingCache[fId]) / 2, 1)
-                    # predRate = (avgYear[i][year]+ mRatingCache[fId]) / 2
-        assert(1 <= predRate <= 5)
-        result += [predRate]
+            for year in avg_year[i]:
+                if year != 'NULL' and (movie_year in range(year, year + 5)):
+                    pred_rate = round(
+                        (avg_year[i][year] + m_rating_cache[film_id]) / 2, 1)
+                    # pred_rate = (avg_year[i][year]+ m_rating_cache[film_id]) / 2
+        assert 1 <= pred_rate <= 5
+        result += [pred_rate]
     return result
 
 
@@ -103,7 +105,6 @@ def netflix_rmse(answer, predict):
 
 def netflix_solve(reader, writer):
     readlist = []
-    rmse = []
     num = 0
     cache = {name: netflix_load_cache(name) for name in CACHE_NAME}
     answer = []
@@ -116,10 +117,10 @@ def netflix_solve(reader, writer):
         else:
             readlist[num - 1] += i
     for line in readlist:
-        fId, cId = netflix_read(line)
-        predRate = netflix_eval(fId, cId, cache)
-        netflix_print(writer, fId, predRate)
-        answer += [cache['answer'][fId][i] for i in cId]
-        predict += predRate
+        film_id, customer_id = netflix_read(line)
+        pred_rate = netflix_eval(film_id, customer_id, cache)
+        netflix_print(writer, film_id, pred_rate)
+        answer += [cache['answer'][film_id][i] for i in customer_id]
+        predict += pred_rate
     writer.write('\nRMSE:' +
                  format(netflix_rmse(answer, predict), '.2f') + '\n')
