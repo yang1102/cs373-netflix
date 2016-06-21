@@ -36,7 +36,6 @@ RunNetflix.tmp: .pylintrc RunNetflix.in RunNetflix.out RunNetflix.py
 	-$(PYLINT) Netflix.py
 	-$(PYLINT) RunNetflix.py
 	./RunNetflix.py < RunNetflix.in > RunNetflix.tmp
-	# diff RunNetflix.tmp RunNetflix.out
 	python3 -m cProfile RunNetflix.py < RunNetflix.in > RunNetflix.tmp
 	cat RunNetflix.tmp
 

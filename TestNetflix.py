@@ -14,7 +14,6 @@
 
 from io import StringIO
 from unittest import main, TestCase
-
 from Netflix import netflix_read, netflix_print, netflix_eval, netflix_solve, netflix_load_cache, netflix_rmse
 
 # -----------
@@ -42,10 +41,10 @@ class TestNetflix (TestCase):
         self.assertEqual(j, [30878, 2647871, 1283744, 2488120])
 
     # Test invalid film ID
-    # def test_read_3(self):
-    #     line = 'a:\n   30878b\n  2647871d\n 1283744s   \n 2488120d'
-    #     with self.assertRaises(ValueError):
-    #         netflix_read(line)
+    def test_read_3(self):
+        line = 'a:\n   30878b\n  2647871d\n 1283744s   \n 2488120d'
+        with self.assertRaises(AssertionError):
+            netflix_read(line)
 
     # -----
     # print
@@ -64,25 +63,59 @@ class TestNetflix (TestCase):
     # ----
     # eval
     # ----
-
     def test_eval_1(self):
-        cache = {'cRatingCache': {1000: 2.1234, 2000: 3.1245, 3000: 4.1235},
-                 'mRatingCache': {1: 3.5678, 2: 4.1235, 3: 2.6688}}
+        cache = {'mYear': {1: 1984, 2: 1993, 3: 2003},
+                 'mRatingCache': {1: 4.2134, 2: 4.1235, 3: 2.6688},
+                 'avgYear': {1000: {1980: 3.5432, 1990: 3.456}, 2000: {1980: 4.217, 2000: 3.8864}, 3000: {1980: 3.459, 1995: 4.0012}}}
         val = netflix_eval(1, [1000, 2000, 3000], cache)
-        self.assertEqual(val, [2.8, 3.3, 3.8])
+        self.assertEqual(val, [3.9, 4.2, 3.8])
 
     # Test the predict rate range
     def test_eval_2(self):
-        cache = {'cRatingCache': {1000: 5.1234, 2000: 3.1245, 3000: 4.1235},
-                 'mRatingCache': {1: 5.5678, 2: 4.1235, 3: 2.6688}}
+        cache = {'mYear': {1: 1984, 2: 1993, 3: 2003},
+                 'mRatingCache': {1: 5.5678, 2: 4.1235, 3: 2.6688},
+                 'avgYear': {1000: {1980: 5.1234, 1990: 3.456}, 2000: {1980: 4.217, 2000: 3.8864}, 3000: {1980: 3.459, 1995: 4.0012}}}
         with self.assertRaises(AssertionError):
             netflix_eval(1, [1000, 2000], cache)
 
+    # Test the file movie year null
     def test_eval_3(self):
-        cache = {'cRatingCache': {1000: 2.1234, 2000: 3.1245, 3000: 4.1235},
-                 'mRatingCache': {1: 3.5678, 2: 4.1235, 3: 2.6688}}
-        val = netflix_eval(2, [1000, 2000, 3000], cache)
-        self.assertEqual(val, [3.1, 3.6, 4.1])
+        cache = {'mYear': {1: 1984, 2: 'NULL', 3: 2003},
+                 'mRatingCache': {1: 4.2134, 2: 4.1235, 3: 2.6688},
+                 'avgYear': {1000: {1980: 4.679, 1990: 3.456, 'NULL': 4.9875}, 2000: {1980: 4.217, 2000: 3.8864}, 3000: {1980: 3.459, 1995: 4.0012, 'NULL': 3.1248}}}
+        val = netflix_eval(2, [1000, 3000], cache)
+        self.assertEqual(val, [4.6, 3.6])
+
+    # Test the customer saw null movie
+    def test_eval_4(self):
+        cache = {'mYear': {1: 1984, 2: 1927, 3: 2003},
+                 'mRatingCache': {1: 4.2134, 2: 4.1235, 3: 2.6688},
+                 'avgYear': {1000: {1980: 4.679, 1990: 3.456, 'NULL': 4.9875}, 2000: {1980: 4.217, 2000: 3.8864}, 3000: {1980: 3.459, 1995: 4.0012, 'NULL': 3.1248}}}
+        val = netflix_eval(1, [1000, 2000, 3000], cache)
+        self.assertEqual(val,  [4.4, 4.2, 3.8])
+
+    # ----------
+    # cache_open
+    # ----------
+    def test_cache_open_1(self):
+        key = "answer"
+        cache = netflix_load_cache(key)
+        self.assertEqual(len(cache), 16938)
+
+    def test_cache_open_2(self):
+        key = 'mYear'
+        cache = netflix_load_cache(key)
+        self.assertEqual(len(cache), 17770)
+
+    def test_cache_open_3(self):
+        key = 'avgYear'
+        cache = netflix_load_cache(key)
+        self.assertEqual(len(cache), 480189)
+
+    def test_cache_open_4(self):
+        key = 'mRatingCache'
+        cache = netflix_load_cache(key)
+        self.assertEqual(len(cache), 17770)
 
     # -----
     # solve
@@ -93,31 +126,48 @@ class TestNetflix (TestCase):
         writer = StringIO()
         netflix_solve(reader, writer)
         self.assertEqual(
-            writer.getvalue(), '1:\n3.7\n3.5\n3.6\n4.2\n3.7\n3.8\n3.5\n\nRMSE:0.69')
+            writer.getvalue(), '1:\n3.7\n3.3\n3.8\n4.2\n3.9\n3.7\n3.1\n\nRMSE:0.75\n')
 
-    def test_solve2(self):
+    # Test movie year is null 4388,NULL,Ancient Civilizations: Rome and Pompeii
+    def test_solve_2(self):
         reader = StringIO(
-            '1000:\n2326571\n977808\n1010534\n1861759\n79755\n98259\n1960212\n97460\n2623506')
+            '4388:\n2493000\n1670719\n1359762\n1753674\n1815164')
         writer = StringIO()
         netflix_solve(reader, writer)
         self.assertEqual(
-            writer.getvalue(), '1000:\n3.4\n3.3\n3.1\n4.1\n3.7\n3.5\n3.5\n3.8\n3.3\n\nRMSE:1.07')
+            writer.getvalue(), '4388:\n2.5\n3.5\n3.0\n2.0\n4.0\n\nRMSE:0.71\n')
 
-    # def test_solve3(self):
-    #     reader = StringIO("100 199\n200 299\n300 399\n400 499\n")
-    #     writer = StringIO()
-    #     netflix_solve(reader, writer)
-    #     self.assertEqual(
-    # writer.getvalue(), "100 199 125\n200 299 128\n300 399 144\n400 499
-    # 142\n")
+    def test_solve_3(self):
+        reader = StringIO(
+            '10004:\n1737087\n1270334\n1262711\n1903515\n2140798\n2479158\n2161335')
+        writer = StringIO()
+        netflix_solve(reader, writer)
+        self.assertEqual(
+            writer.getvalue(),'10004:\n4.5\n4.2\n3.9\n4.0\n4.1\n4.0\n4.1\n\nRMSE:0.87\n')
+
+    # -----
+    # rmse
+    # -----
+    def test_rmse_1(self):
+        error = netflix_rmse([1, 2, 3], [1, 2, 3])
+        self.assertEqual(error, 0)
+
+    # test the decimal rate
+    def test_rmse_2(self):
+        error = netflix_rmse([5, 6, 7], [9.0, 10.0, 11.0])
+        self.assertEqual(error, 4.00)
+
+    def test_rmse_3(self):
+        error = netflix_rmse([4, 2, 3], [1, 2, 3])
+        self.assertEqual(error, 1.73)
 
 
 # ----
 # main
 # ----
-
 if __name__ == "__main__":
     main()
+
 
 """ #pragma: no cover
 % coverage3 run --branch TestNetflix.py >  TestNetflix.out 2>&1
@@ -129,15 +179,15 @@ if __name__ == "__main__":
 
 
 % cat TestNetflix.out
-.......
+...................
 ----------------------------------------------------------------------
-Ran 7 tests in 0.001s
+Ran 19 tests in 13.212s
 
 OK
-Name          Stmts   Miss Branch BrMiss  Cover   Missing
----------------------------------------------------------
-netflix          18      0      6      0   100%
-Testnetflix      33      1      2      1    94%   79
----------------------------------------------------------
-TOTAL            51      1      8      1    97%
+Name             Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------
+Netflix.py          67      0     22      0   100%   
+TestNetflix.py      84      0      0      0   100%   
+------------------------------------------------------------
+TOTAL              151      0     22      0   100%   
 """
