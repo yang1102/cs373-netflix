@@ -81,6 +81,8 @@ def netflix_load_cache(name):
     return cache
 
 # compute the RMSE.
+
+
 def netflix_rmse(answer, predict):
 
     return round(sqrt(mean(square(subtract(answer, predict)))), 2)
