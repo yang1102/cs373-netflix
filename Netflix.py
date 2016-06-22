@@ -20,8 +20,12 @@ CACHE_NAME = {
     'avg_year': 'sy6955-avgUserFiveYears.p'}
 
 
-# no order
 def netflix_read(line):
+    """
+    read a line from cache
+    string tok string
+    return an int and a list, representing the film_id and list of customer_id
+    """
     customer_id = []
     line = line.split()
     try:
@@ -38,19 +42,21 @@ def netflix_read(line):
 
 
 def netflix_print(writer, film_id, pred_rate):
+    """
+    print a film_id and its ratings
+    writer a writer
+    """
     output = ''
     for i in pred_rate:
         output += format(i, '.1f') + '\n'
     writer.write(str(film_id) + ':\n' + output)
 
 
-# find the rating of movieA (with given film_id) first, and
-# find the average rating of all movies this customer has rated
-# in a 5-year span where movieA is in.
 def netflix_eval(film_id, customer_id, cache):
     '''
-    get avg rating for the movie and avg rating for year
-    avg it
+    get avg rating for the movie and
+    avg rating all movies customer has rated in a 5-year span that this is in
+    avg them
     '''
     m_rating_cache = cache['m_rating_cache']
     m_year = cache['m_year']
@@ -76,19 +82,26 @@ def netflix_eval(film_id, customer_id, cache):
 
 
 def netflix_load_cache(name):
+    '''
+    load a cache
+    '''
     cache_read_from_url = urlopen(BASE_URL + CACHE_NAME[name]).read()
     cache = pickle.loads(cache_read_from_url)
     return cache
 
-# compute the RMSE.
-
 
 def netflix_rmse(answer, predict):
-
+    '''
+    compute the RMSE
+    '''
     return round(sqrt(mean(square(subtract(answer, predict)))), 2)
 
 
 def netflix_solve(reader, writer):
+    """
+    reader a reader
+    writer a writer
+    """
     readlist = []
     num = 0
     cache = {name: netflix_load_cache(name) for name in CACHE_NAME}
