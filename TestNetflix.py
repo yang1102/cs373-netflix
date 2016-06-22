@@ -152,7 +152,7 @@ class TestNetflix (TestCase):
         writer = StringIO()
         netflix_solve(reader, writer)
         self.assertEqual(
-            writer.getvalue(),'10004:\n4.5\n4.2\n3.9\n4.0\n4.1\n4.0\n4.1\n\nRMSE:0.87\n')
+            writer.getvalue(), '10004:\n4.5\n4.2\n3.9\n4.0\n4.1\n4.0\n4.1\n\nRMSE:0.87\n')
 
     # -----
     # rmse
@@ -195,8 +195,8 @@ Ran 19 tests in 13.212s
 OK
 Name             Stmts   Miss Branch BrPart  Cover   Missing
 ------------------------------------------------------------
-Netflix.py          67      0     22      0   100%   
-TestNetflix.py      84      0      0      0   100%   
+Netflix.py          67      0     22      0   100%
+TestNetflix.py      84      0      0      0   100%
 ------------------------------------------------------------
-TOTAL              151      0     22      0   100%   
+TOTAL              151      0     22      0   100%
 """

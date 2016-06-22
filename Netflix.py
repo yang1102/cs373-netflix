@@ -24,8 +24,6 @@ CACHE_NAME = {
 def netflix_read(line):
     customer_id = []
     line = line.split()
-    # film_id = int(line[0].strip(':'))
-    # customer_id += [int(i) for i in line[1:]]
     try:
         film_id = int(line[0].strip(':'))
     except ValueError:
@@ -46,24 +44,10 @@ def netflix_print(writer, film_id, pred_rate):
     writer.write(str(film_id) + ':\n' + output)
 
 
-# def netflix_eval(film_id, customer_id, cache):
-# preditciont alg 1
-#     '''
-#     get avg rating for the movie and avg rating for customer
-#     avg it
-#     '''
-#     cRatingCache = cache['cRatingCache']
-#     m_rating_cache = cache['m_rating_cache']
-#     result = []
-#     for i in customer_id:
-#         pred_rate = round((cRatingCache[i] + m_rating_cache[film_id]) / 2, 1)
-#         assert(1 <= pred_rate <= 5)
-#         result += [pred_rate]
-#     return result
-#     return [(cRatingCache[i]+m_rating_cache[film_id])/2 for i in customer_id]
-
+# find the rating of movieA (with given film_id) first, and
+# find the average rating of all movies this customer has rated
+# in a 5-year span where movieA is in.
 def netflix_eval(film_id, customer_id, cache):
-    # preditciont alg 1
     '''
     get avg rating for the movie and avg rating for year
     avg it
@@ -78,7 +62,6 @@ def netflix_eval(film_id, customer_id, cache):
         if movie_year == 'NULL':
             pred_rate = round(
                 (avg_year[i][movie_year] + m_rating_cache[film_id]) / 2, 1)
-            # pred_rate = (avg_year[i][movie_year]+ m_rating_cache[film_id]) / 2
 
         else:
             movie_year = int(movie_year)
@@ -86,7 +69,7 @@ def netflix_eval(film_id, customer_id, cache):
                 if year != 'NULL' and (movie_year in range(year, year + 5)):
                     pred_rate = round(
                         (avg_year[i][year] + m_rating_cache[film_id]) / 2, 1)
-                    # pred_rate = (avg_year[i][year]+ m_rating_cache[film_id]) / 2
+
         assert 1 <= pred_rate <= 5
         result += [pred_rate]
     return result
@@ -97,7 +80,7 @@ def netflix_load_cache(name):
     cache = pickle.loads(cache_read_from_url)
     return cache
 
-
+# compute the RMSE.
 def netflix_rmse(answer, predict):
 
     return round(sqrt(mean(square(subtract(answer, predict)))), 2)
