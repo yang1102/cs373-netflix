@@ -23,3 +23,9 @@ Thumbs.db
 
 # Project Requairement #
 ########################
+Temp/
+.coverage
+.pylintrc
+Netflix-tests/
+__pycache__/
+*.tmp

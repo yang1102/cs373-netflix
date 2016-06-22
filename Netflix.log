@@ -1,0 +1,35 @@
+commit 4fb6973607c7ac2c9b1433bb661e9c5cdaeae7e8
+Author: Chuqi Zhou <cz4792@utexas.edu>
+Date:   Tue Jun 21 19:59:16 2016 -0500
+
+    This closes #6 and closes #7
+
+commit eebe5c002973ef18d507edbf2fdcc249298be0d7
+Author: Chuqi Zhou <cz4792@utexas.edu>
+Date:   Tue Jun 21 00:02:09 2016 -0500
+
+    This adds two files
+
+commit 91647a3058a5e27d070da7383c1191835719113e
+Author: Chuqi Zhou <cz4792@utexas.edu>
+Date:   Mon Jun 20 23:57:58 2016 -0500
+
+    This closes #2, closes #8, and fixes #12
+
+commit 2164eba25e1cb85ac919b4d5441d0c8c049e72b0
+Author: Shuoyi Yang <yangshy2012@gmail.com>
+Date:   Mon Jun 20 23:07:38 2016 -0500
+
+    Add more unit tests which closes #4, and fixes #11 by adding a comment after main
+
+commit b171218c9d9f44735803d8f21e0ed41331eaa482
+Author: Shuoyi Yang <yangshy2012@gmail.com>
+Date:   Sun Jun 19 15:59:14 2016 -0500
+
+    Add some unit Tests which closes #4, and write a basic implementation closes #5
+
+commit f48ef342a8c7f6cbcad5f31e2346683d7dd52c2e
+Author: Shuoyi Yang <yangshy2012@gmail.com>
+Date:   Thu Jun 16 15:19:23 2016 -0500
+
+    First commit, initial files
